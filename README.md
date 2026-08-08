@@ -25,11 +25,14 @@ anonimizados (Ley 25.326); los datos fiscales reales viven en la instalación de
 ## Desarrollo
 
 ```bash
-cd backend
-pip install -r requirements.txt
-python -m pytest -v                 # tests
-uvicorn app.main:app --reload       # API en http://localhost:8000 (docs en /docs)
+cd frontend
+npm install          # primera vez
+npm run dev          # levanta AMBOS: backend uvicorn :8000 + web :3000
 ```
+
+La web necesita el backend: sin uvicorn corriendo, el proxy devuelve 500.
+Para correr solo el backend: `cd backend && uvicorn app.main:app --reload`
+(tests: `python -m pytest -v`, docs de la API en http://localhost:8000/docs)
 
 ## Prototipo Etapa 0 (portón ARCA)
 

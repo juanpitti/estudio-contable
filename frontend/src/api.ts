@@ -31,6 +31,8 @@ async function manejarError(r: Response): Promise<never> {
   if (r.status === 422) throw new Error("Datos inválidos (revisá CUIT, condición IVA o alícuotas)")
   if (r.status === 409) throw new Error("Ese CUIT ya está registrado")
   if (r.status === 404) throw new Error("Cliente no encontrado")
+  if (r.status >= 500)
+    throw new Error("No hay conexión con el backend (uvicorn :8000). Levantalo con `npm run dev` que inicia ambos servidores.")
   throw new Error(`Error del servidor (${r.status})`)
 }
 
