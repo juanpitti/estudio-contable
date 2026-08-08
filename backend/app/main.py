@@ -4,6 +4,7 @@ import os
 
 from fastapi import FastAPI
 
+from app.api.auth import router as auth_router
 from app.api.clientes import router as clientes_router
 
 
@@ -19,6 +20,7 @@ def crear_app() -> FastAPI:
         env = os.environ.get("ARCA_ENV", "homologacion")
         return {"status": "ok", "env": env}
 
+    app.include_router(auth_router)
     app.include_router(clientes_router)
     return app
 

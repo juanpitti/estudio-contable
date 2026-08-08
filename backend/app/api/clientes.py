@@ -6,6 +6,7 @@ PostgreSQL lo reemplaza en la iteración con DB sin tocar los endpoints.
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.auth import requerir_rol, usuario_actual
 from app.models import Cliente, ClienteIn
 
 router = APIRouter(prefix="/clientes", tags=["clientes"])
@@ -43,7 +44,11 @@ def get_repo() -> RepoClientes:
 
 
 @router.post("", status_code=201, response_model=Cliente)
-def crear_cliente(datos: ClienteIn, repo: RepoClientes = Depends(get_repo)) -> Cliente:
+def crear_cliente(
+    datos: ClienteIn,
+    repo: RepoClientes = Depends(get_repo),
+    _usuario: dict = Depends(requerir_rol("owner", "senior")),
+) -> Cliente:
     try:
         return repo.crear(datos)
     except CuitDuplicado:
@@ -51,12 +56,19 @@ def crear_cliente(datos: ClienteIn, repo: RepoClientes = Depends(get_repo)) -> C
 
 
 @router.get("", response_model=list[Cliente])
-def listar_clientes(repo: RepoClientes = Depends(get_repo)) -> list[Cliente]:
+def listar_clientes(
+    repo: RepoClientes = Depends(get_repo),
+    _usuario: dict = Depends(usuario_actual),
+) -> list[Cliente]:
     return repo.listar()
 
 
 @router.get("/{cliente_id}", response_model=Cliente)
-def obtener_cliente(cliente_id: int, repo: RepoClientes = Depends(get_repo)) -> Cliente:
+def obtener_cliente(
+    cliente_id: int,
+    repo: RepoClientes = Depends(get_repo),
+    _usuario: dict = Depends(usuario_actual),
+) -> Cliente:
     cliente = repo.obtener(cliente_id)
     if cliente is None:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")

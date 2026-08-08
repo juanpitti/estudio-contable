@@ -9,7 +9,12 @@ from app.main import app
 def client():
     repo = RepoClientes()  # repo fresco por test: aislamiento real
     app.dependency_overrides[get_repo] = lambda: repo
-    yield TestClient(app)
+    c = TestClient(app)
+    token = c.post(
+        "/auth/login", json={"username": "owner", "password": "owner123"}
+    ).json()["access_token"]
+    c.headers["Authorization"] = f"Bearer {token}"
+    yield c
     app.dependency_overrides.clear()
 
 
