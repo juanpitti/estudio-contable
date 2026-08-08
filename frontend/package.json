@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
     "dev:web": "vite",
-    "dev:api": "cd ../backend && python -m uvicorn app.main:app --port 8000",
+    "dev:api": "python -m uvicorn --app-dir ../backend app.main:app --port 8000",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
