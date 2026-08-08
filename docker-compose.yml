@@ -1,0 +1,23 @@
+# Entorno de desarrollo/staging — SOLO datos ficticios o anonimizados (Plan v4, regla 2).
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      ARCA_ENV: homologacion
+      DATABASE_URL: postgresql://estudio:estudio_dev@db:5432/estudio
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: estudio
+      POSTGRES_PASSWORD: estudio_dev
+      POSTGRES_DB: estudio
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
