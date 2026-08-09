@@ -46,6 +46,15 @@ def crear_app() -> FastAPI:
     app.include_router(convenio_cm_router)
     app.include_router(monitor_router)
     app.include_router(asistente_router)
+
+    static_dir = os.environ.get("STATIC_DIR", "static")
+    if os.path.isdir(static_dir):
+        from fastapi.staticfiles import StaticFiles
+        app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+
+    return app
+    app.include_router(monitor_router)
+    app.include_router(asistente_router)
     return app
 
 
