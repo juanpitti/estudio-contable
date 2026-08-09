@@ -15,7 +15,7 @@ Plataforma web para estudios contables argentinos, desarrollada por etapas teste
 - **Obsidian:** nota del proyecto en `Obsidian Vault/02-Proyectos/Estudio Contable.md`.
 - **Proceso de trabajo:** skills instaladas en Kimi Work — `writing-plans` → `executing-plans` → `test-driven-development` → `systematic-debugging` → `requesting-code-review` → `verification-before-completion`. Planes en `docs/plans/`.
 
-## Hecho (68 tests backend verdes)
+## Hecho (83 tests backend verdes)
 
 | Módulo | Archivos | Notas |
 |---|---|---|
@@ -28,7 +28,8 @@ Plataforma web para estudios contables argentinos, desarrollada por etapas teste
 | IVA — Papeles Excel | `app/iva/papeles.py` | genera .xlsx con hojas Resumen/Ventas/Compras, formato moneda ARS |
 | API Comprobantes | `app/api/comprobantes.py` | POST/GET comprobantes, liquidación con alertas, descarga Excel `/iva/{p}/papel-trabajo` |
 | ARCA Descarga | `app/api/arca.py` | stub listo para wsfe; requiere certificado de homologación del cliente |
-| Frontend | `frontend/` | React+TS+Tailwind; login, subir factura (semáforo), Clientes, Liquidación IVA con alertas visuales + descarga Excel; `npm run dev` levanta ambos servidores |
+| **Conciliación bancaria** | `app/conciliacion/` | **Etapa 3 completa**: parser CSV genérico, deduplicador, motor match 4 niveles (exacto/monto+fecha/rango/aproximado), endpoint `POST /conciliacion/importar` |
+| Frontend | `frontend/` | React+TS+Tailwind; login, subir factura (semáforo), Clientes, Liquidación IVA (alertas + descarga Excel), **Conciliación bancaria (CSV + % match + diferencias)**; `npm run dev` levanta ambos servidores |
 | Infra | docker-compose, `.github/workflows/ci.yml` | PostgreSQL cableada pero SIN conectar |
 
 ## Pendiente inmediato (cola priorizada)
@@ -36,7 +37,7 @@ Plataforma web para estudios contables argentinos, desarrollada por etapas teste
 1. **OCR real:** RapidOCR (onnxruntime, pip puro) detrás de `app/extractor/ocr.py` + fallback LLM. Prueba de aceptación v4: 20 facturas, ≥90% campos críticos.
 2. **Conectar PostgreSQL** (persistencia; hoy cada reinicio limpia todo).
 3. **Descarga ARCA end-to-end:** cuando esté disponible certificado de homologación, activar `_wsfe_consultar_comprobantes` en `app/api/arca.py`.
-4. **Etapa 3:** Conciliación y retenciones (motor de match 4 niveles + parsers bancarios).
+4. **Etapa 4:** Facturación con CAE (Plan 9). Hito comercial: desde acá el producto ya se le puede mostrar a un estudio piloto.
 
 ## Bloqueos / no verificado
 
