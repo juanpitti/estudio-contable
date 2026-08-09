@@ -15,6 +15,7 @@ from pydantic import BaseModel, field_validator
 
 from app.api.clientes import RepoClientes, get_repo
 from app.auth import requerir_rol, usuario_actual
+from app.iva.alertas import analizar_alertas
 from app.iva.calculadora import liquidacion_iva
 from app.iva.comprobante import AlicuotaLinea, ComprobanteIva
 
@@ -65,6 +66,19 @@ class RepoComprobantes:
 
     def de_cliente(self, cliente_id: int) -> list[ComprobanteIva]:
         return [c for c in self._datos.values() if c.cliente_id == cliente_id]
+
+    def historial_saldos_favor(self, cliente_id: int, periodos: list[str]) -> list[Decimal]:
+        """Devuelve saldo_a_favor_final por período, en orden cronológico."""
+        resultados = []
+        for periodo in periodos:
+            comps = [c for c in self.de_cliente(cliente_id) if c.periodo == periodo]
+            liq = liquidacion_iva(
+                [c for c in comps if c.tipo == "venta"],
+                [c for c in comps if c.tipo == "compra"],
+                Decimal("0"),  # sin arrastre para el historial puro
+            )
+            resultados.append(liq.saldo_a_favor_final)
+        return resultados
 
 
 _repo = RepoComprobantes()
@@ -134,6 +148,18 @@ def liquidacion_del_periodo(
         [c for c in comps if c.tipo == "compra"],
         saldo_favor_anterior,
     )
+    # Calcular historial de saldos para alertas
+    año, mes = periodo.split("-")
+    periodos_previos = []
+    for i in range(1, 12):
+        m = int(mes) - i
+        y = int(año)
+        while m <= 0:
+            m += 12
+            y -= 1
+        periodos_previos.append(f"{y:04d}-{m:02d}")
+    historial = repo.historial_saldos_favor(cliente_id, periodos_previos)
+    alertas = analizar_alertas(liq, historial)
     return {
         "periodo": periodo,
         "debito": {str(a): str(t) for a, t in liq.debito.items()},
@@ -142,4 +168,5 @@ def liquidacion_del_periodo(
         "saldo_a_pagar": str(liq.saldo_a_pagar),
         "saldo_a_favor_final": str(liq.saldo_a_favor_final),
         "comprobantes_incluidos": [c.id for c in comps],
+        "alertas": [{"nivel": a.nivel, "codigo": a.codigo, "mensaje": a.mensaje} for a in alertas],
     }

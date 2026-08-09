@@ -96,3 +96,20 @@ def test_listar_comprobantes(client):
     r = client.get("/clientes/1/comprobantes")
     assert r.status_code == 200
     assert len(r.json()) == 1
+
+
+def test_liquidacion_con_alerta_salto_credito(client):
+    # Crear venta pequeña y compra grande
+    client.post("/clientes/1/comprobantes", json={
+        "tipo": "venta", "fecha": "2026-08-01",
+        "lineas": [{"alicuota": "0.21", "neto": "100000", "iva": "21000"}]
+    })
+    client.post("/clientes/1/comprobantes", json={
+        "tipo": "compra", "fecha": "2026-08-01",
+        "lineas": [{"alicuota": "0.21", "neto": "238095", "iva": "50000"}]
+    })
+    r = client.get("/clientes/1/iva/2026-08")
+    assert r.status_code == 200
+    data = r.json()
+    assert any(a["codigo"] == "salto_credito_fiscal" for a in data["alertas"])
+    assert data["saldo_a_favor_final"] == "29000"
