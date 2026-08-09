@@ -5,6 +5,7 @@ import os
 from fastapi import FastAPI
 
 from app.api.arca import router as arca_router
+from app.api.asistente import router as asistente_router
 from app.api.auth import router as auth_router
 from app.api.bitacora import router as bitacora_router
 from app.api.clientes import router as clientes_router
@@ -44,6 +45,7 @@ def crear_app() -> FastAPI:
     app.include_router(f931_router)
     app.include_router(convenio_cm_router)
     app.include_router(monitor_router)
+    app.include_router(asistente_router)
     return app
 
 
