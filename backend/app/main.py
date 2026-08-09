@@ -4,6 +4,7 @@ import os
 
 from fastapi import FastAPI
 
+from app.api.arca import router as arca_router
 from app.api.auth import router as auth_router
 from app.api.clientes import router as clientes_router
 from app.api.comprobantes import router as comprobantes_router
@@ -26,6 +27,7 @@ def crear_app() -> FastAPI:
     app.include_router(clientes_router)
     app.include_router(extraccion_router)
     app.include_router(comprobantes_router)
+    app.include_router(arca_router)
     return app
 
 
