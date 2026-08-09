@@ -176,6 +176,25 @@ export async function emitirFactura(
   return r.json()
 }
 
+export async function consultarMonotributo(
+  clienteId: number,
+  token: string,
+): Promise<{
+  categoria_actual: string
+  categoria_proyectada: string
+  ingresos_acumulados: string
+  techo_actual: string
+  porcentaje_del_techo: number
+  alerta: { nivel: string; mensaje: string } | null
+  cuota_mensual: string | null
+}> {
+  const r = await fetch(`/clientes/${clienteId}/monotributo`, {
+    headers: conToken(token),
+  })
+  if (!r.ok) await manejarError(r)
+  return r.json()
+}
+
 export async function importarConciliacion(
   clienteId: number,
   archivo: File,
