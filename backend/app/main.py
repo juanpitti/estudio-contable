@@ -13,6 +13,9 @@ from app.api.extraccion import router as extraccion_router
 from app.api.facturacion import router as facturacion_router
 from app.api.monotributo import router as monotributo_router
 from app.api.bitacora import router as bitacora_router
+from app.api.dashboard import router as dashboard_router
+from app.api.monotributo import router as monotributo_router
+from app.api.bitacora import router as bitacora_router
 from app.api.monotributo import router as monotributo_router
 
 
@@ -37,6 +40,8 @@ def crear_app() -> FastAPI:
     app.include_router(facturacion_router)
     app.include_router(monotributo_router)
     app.include_router(bitacora_router)
+    app.include_router(dashboard_router)
+    return app
     return app
     return app
     return app
