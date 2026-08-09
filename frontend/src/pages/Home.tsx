@@ -1,24 +1,28 @@
 import { useState } from "react"
 import Clientes from "../components/Clientes"
 import Conciliacion from "../components/Conciliacion"
+import Dashboard from "../components/Dashboard"
 import Facturacion from "../components/Facturacion"
 import Liquidacion from "../components/Liquidacion"
 import Login from "../components/Login"
+import Monotributo from "../components/Monotributo"
 import SubirFactura from "../components/SubirFactura"
 
-type Solapa = "subir" | "clientes" | "liquidacion" | "conciliacion" | "facturacion"
+type Solapa = "dashboard" | "subir" | "clientes" | "facturacion" | "monotributo" | "liquidacion" | "conciliacion"
 
 const SOLAPAS: { id: Solapa; etiqueta: string }[] = [
+  { id: "dashboard", etiqueta: "Dashboard" },
   { id: "subir", etiqueta: "Subir factura" },
   { id: "clientes", etiqueta: "Clientes" },
   { id: "facturacion", etiqueta: "Facturación" },
+  { id: "monotributo", etiqueta: "Monotributo" },
   { id: "liquidacion", etiqueta: "Liquidación IVA" },
   { id: "conciliacion", etiqueta: "Conciliación" },
 ]
 
 export default function Home() {
   const [token, setToken] = useState<string>(() => localStorage.getItem("token") ?? "")
-  const [solapa, setSolapa] = useState<Solapa>("subir")
+  const [solapa, setSolapa] = useState<Solapa>("dashboard")
 
   function handleLogin(nuevoToken: string) {
     localStorage.setItem("token", nuevoToken)
@@ -41,7 +45,7 @@ export default function Home() {
             Cerrar sesión
           </button>
         </div>
-        <nav className="max-w-3xl mx-auto px-4 flex gap-1 pb-2">
+        <nav className="max-w-3xl mx-auto px-4 flex gap-1 pb-2 flex-wrap">
           {SOLAPAS.map((s) => (
             <button
               key={s.id}
@@ -59,9 +63,11 @@ export default function Home() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
+        {solapa === "dashboard" && <Dashboard token={token} />}
         {solapa === "subir" && <SubirFactura token={token} />}
         {solapa === "clientes" && <Clientes token={token} />}
         {solapa === "facturacion" && <Facturacion token={token} />}
+        {solapa === "monotributo" && <Monotributo token={token} />}
         {solapa === "liquidacion" && <Liquidacion token={token} />}
         {solapa === "conciliacion" && <Conciliacion token={token} />}
       </main>
