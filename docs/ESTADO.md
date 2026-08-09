@@ -15,7 +15,7 @@ Plataforma web para estudios contables argentinos, desarrollada por etapas teste
 - **Obsidian:** nota del proyecto en `Obsidian Vault/02-Proyectos/Estudio Contable.md`.
 - **Proceso de trabajo:** skills instaladas en Kimi Work — `writing-plans` → `executing-plans` → `test-driven-development` → `systematic-debugging` → `requesting-code-review` → `verification-before-completion`. Planes en `docs/plans/`.
 
-## Hecho (110+ tests backend verdes)
+## Hecho (120+ tests backend verdes)
 
 | Módulo | Archivos | Notas |
 |---|---|---|
@@ -36,10 +36,18 @@ Plataforma web para estudios contables argentinos, desarrollada por etapas teste
 | **Dashboard** | `app/api/dashboard.py` | **Etapa 5**: endpoint `/dashboard` con semáforos, vencimientos, alertas |
 | **F.931** | `app/f931/` | **Etapa 6**: generador TXT F.931 (registros 1/2/3 SICOSS), endpoint `/clientes/{id}/f931/generar` |
 | **Convenio Multilateral** | `app/convenio/` | **Etapa 6**: atribución por jurisdicción (24 provincias + CABA), cálculo de coeficientes CM05, endpoint `/clientes/{id}/convenio/cm05` |
+| **Monitor fiscal** | `app/monitor/` | **Etapa 7**: alertas automáticas por cliente (IVA sin revisar, monotributo cerca del techo), alertas globales (vencimientos), endpoint `/monitor/alertas` |
+| **Asistente IA** | `app/asistente/` | **Etapa 7**: chat sobre datos propios del sistema (clientes, vencimientos, alertas), endpoint `/asistente` |
+| Frontend | `frontend/` | React+TS+Tailwind; **10 tabs**: Dashboard, Subir factura, Clientes, Facturación, Monotributo, **F.931**, **Convenio**, Liquidación IVA, Conciliación, **Asistente**; `npm run dev` levanta ambos servidores |
+| Infra | docker-compose, `.github/workflows/ci.yml` | PostgreSQL cableada pero SIN conectar |
 | Frontend | `frontend/` | React+TS+Tailwind; 9 tabs: Dashboard, Subir factura, Clientes, Facturación, Monotributo, **F.931**, **Convenio**, Liquidación IVA, Conciliación; `npm run dev` levanta ambos servidores |
 | Infra | docker-compose, `.github/workflows/ci.yml` | PostgreSQL cableada pero SIN conectar |
 
 ## Pendiente inmediato (cola priorizada)
+
+1. **OCR real:** RapidOCR (onnxruntime, pip puro) detrás de `app/extractor/ocr.py` + fallback LLM. Prueba de aceptación v4: 20 facturas, ≥90% campos críticos.
+2. **Conectar PostgreSQL** (persistencia; hoy cada reinicio limpia todo).
+3. **Descarga ARCA end-to-end:** cuando esté disponible certificado de homologación, activar `_wsfe_consultar_comprobantes` en `app/api/arca.py`.
 
 1. **Etapa 7:** Monitor fiscal y asistente IA (Semanas 25-30) — Plan 11 + Plan 13
 2. **OCR real:** RapidOCR (onnxruntime, pip puro) detrás de `app/extractor/ocr.py` + fallback LLM. Prueba de aceptación v4: 20 facturas, ≥90% campos críticos.

@@ -228,6 +228,19 @@ export async function generarCM05(
   return r.json()
 }
 
+export async function consultarAsistente(
+  pregunta: string,
+  token: string,
+): Promise<{ texto: string; fuente: string; links: { label: string; path: string }[] }> {
+  const r = await fetch("/asistente", {
+    method: "POST",
+    headers: { ...conToken(token), "Content-Type": "application/json" },
+    body: JSON.stringify({ pregunta }),
+  })
+  if (!r.ok) await manejarError(r)
+  return r.json()
+}
+
 export async function importarConciliacion(
   clienteId: number,
   archivo: File,
