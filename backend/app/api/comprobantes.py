@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, field_validator
 
 from app.api.clientes import RepoClientes, get_repo
@@ -18,6 +18,7 @@ from app.auth import requerir_rol, usuario_actual
 from app.iva.alertas import analizar_alertas
 from app.iva.calculadora import liquidacion_iva
 from app.iva.comprobante import AlicuotaLinea, ComprobanteIva
+from app.iva.papeles import generar_papel_trabajo
 
 router = APIRouter(prefix="/clientes/{cliente_id}", tags=["comprobantes"])
 
@@ -170,3 +171,27 @@ def liquidacion_del_periodo(
         "comprobantes_incluidos": [c.id for c in comps],
         "alertas": [{"nivel": a.nivel, "codigo": a.codigo, "mensaje": a.mensaje} for a in alertas],
     }
+
+
+@router.get("/iva/{periodo}/papel-trabajo")
+def descargar_papel_trabajo(
+    cliente_id: int,
+    periodo: str,
+    saldo_favor_anterior: Decimal = Query(default=Decimal("0")),
+    repo: RepoComprobantes = Depends(get_repo_comprobantes),
+    repo_cli: RepoClientes = Depends(get_repo),
+    _usuario: dict = Depends(usuario_actual),
+):
+    _verificar_cliente(cliente_id, repo_cli)
+    comps = [c for c in repo.de_cliente(cliente_id) if c.periodo == periodo]
+    liq = liquidacion_iva(
+        [c for c in comps if c.tipo == "venta"],
+        [c for c in comps if c.tipo == "compra"],
+        saldo_favor_anterior,
+    )
+    data = generar_papel_trabajo(liq, comps, periodo)
+    return Response(
+        content=data,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="papel-trabajo-{periodo}.xlsx"'},
+    )

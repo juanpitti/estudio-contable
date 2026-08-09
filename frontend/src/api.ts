@@ -16,6 +16,12 @@ export interface Cliente {
   condicion_iva: "RI" | "MT" | "EX" | "CF"
 }
 
+export interface AlertaIva {
+  nivel: "info" | "warning" | "critical"
+  codigo: string
+  mensaje: string
+}
+
 export interface LiquidacionIva {
   periodo: string
   debito: Record<string, string>
@@ -24,6 +30,7 @@ export interface LiquidacionIva {
   saldo_a_pagar: string
   saldo_a_favor_final: string
   comprobantes_incluidos: number[]
+  alertas: AlertaIva[]
 }
 
 async function manejarError(r: Response): Promise<never> {
@@ -111,4 +118,16 @@ export async function liquidacionIva(
   })
   if (!r.ok) await manejarError(r)
   return r.json()
+}
+
+export async function descargarPapelTrabajo(
+  clienteId: number,
+  periodo: string,
+  token: string,
+): Promise<Blob> {
+  const r = await fetch(`/clientes/${clienteId}/iva/${periodo}/papel-trabajo`, {
+    headers: conToken(token),
+  })
+  if (!r.ok) throw new Error("Error al descargar papel de trabajo")
+  return r.blob()
 }

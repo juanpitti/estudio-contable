@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { liquidacionIva, listarClientes, type Cliente, type LiquidacionIva } from "../api"
+import { liquidacionIva, listarClientes, descargarPapelTrabajo, type Cliente, type LiquidacionIva } from "../api"
 
 const ETIQUETA_ALICUOTA: Record<string, string> = {
   "0.21": "21%",
@@ -38,6 +38,24 @@ export default function Liquidacion({ token }: { token: string }) {
     }
   }
 
+  async function descargar() {
+    if (clienteId === "") return
+    setCargando(true)
+    try {
+      const blob = await descargarPapelTrabajo(clienteId, periodo, token)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `papel-trabajo-${periodo}.xlsx`
+      a.click()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al descargar")
+    } finally {
+      setCargando(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <section className="bg-white rounded-xl shadow-md p-6 space-y-3">
@@ -68,6 +86,13 @@ export default function Liquidacion({ token }: { token: string }) {
           >
             {cargando ? "Calculando…" : "Calcular"}
           </button>
+          <button
+            onClick={descargar}
+            disabled={cargando || clienteId === "" || !liq}
+            className="bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50"
+          >
+            Descargar papel de trabajo
+          </button>
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
       </section>
@@ -77,6 +102,26 @@ export default function Liquidacion({ token }: { token: string }) {
           <h3 className="font-semibold text-slate-800">
             {liq.periodo} — {liq.comprobantes_incluidos.length} comprobante(s) incluido(s)
           </h3>
+
+          {liq.alertas.length > 0 && (
+            <div className="space-y-2">
+              {liq.alertas.map((a) => (
+                <div
+                  key={a.codigo}
+                  className={`rounded-lg p-3 text-sm ${
+                    a.nivel === "critical"
+                      ? "bg-red-50 text-red-800 border border-red-200"
+                      : a.nivel === "warning"
+                      ? "bg-amber-50 text-amber-800 border border-amber-200"
+                      : "bg-blue-50 text-blue-800 border border-blue-200"
+                  }`}
+                >
+                  <strong>{a.nivel.toUpperCase()}:</strong> {a.mensaje}
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <h4 className="text-sm font-medium text-slate-500 mb-2">Débito fiscal (ventas)</h4>
