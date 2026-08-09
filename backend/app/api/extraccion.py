@@ -11,9 +11,13 @@ from fastapi import APIRouter, Depends, UploadFile
 from app.auth import usuario_actual
 from app.extractor.pipeline import PipelineExtraccion
 
-router = APIRouter(prefix="/extraccion", tags=["extraccion"])
+try:
+    from app.extractor.ocr_rapid import RapidOcrExtractor
+    _pipeline = PipelineExtraccion(ocr=RapidOcrExtractor())
+except Exception:
+    _pipeline = PipelineExtraccion()
 
-_pipeline = PipelineExtraccion()
+router = APIRouter(prefix="/extraccion", tags=["extraccion"])
 
 
 @router.post("/comprobante")
