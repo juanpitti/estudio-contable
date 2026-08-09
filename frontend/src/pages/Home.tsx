@@ -1,15 +1,17 @@
 import { useState } from "react"
 import Clientes from "../components/Clientes"
+import Conciliacion from "../components/Conciliacion"
 import Liquidacion from "../components/Liquidacion"
 import Login from "../components/Login"
 import SubirFactura from "../components/SubirFactura"
 
-type Solapa = "subir" | "clientes" | "liquidacion"
+type Solapa = "subir" | "clientes" | "liquidacion" | "conciliacion"
 
 const SOLAPAS: { id: Solapa; etiqueta: string }[] = [
   { id: "subir", etiqueta: "Subir factura" },
   { id: "clientes", etiqueta: "Clientes" },
   { id: "liquidacion", etiqueta: "Liquidación IVA" },
+  { id: "conciliacion", etiqueta: "Conciliación" },
 ]
 
 export default function Home() {
@@ -58,6 +60,7 @@ export default function Home() {
         {solapa === "subir" && <SubirFactura token={token} />}
         {solapa === "clientes" && <Clientes token={token} />}
         {solapa === "liquidacion" && <Liquidacion token={token} />}
+        {solapa === "conciliacion" && <Conciliacion token={token} />}
       </main>
     </div>
   )

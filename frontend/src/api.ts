@@ -33,6 +33,17 @@ export interface LiquidacionIva {
   alertas: AlertaIva[]
 }
 
+export interface ResultadoConciliacion {
+  porcentaje_match: number
+  matches: { comprobante_id: number; movimiento_id: number; nivel: string; monto_comprobante: string; monto_movimiento: string }[]
+  sin_match_compras: number[]
+  sin_match_banco: { id: number; fecha: string; descripcion: string; monto: string }[]
+  diferencias: { comprobante_id: number; movimiento_id: number; monto_diferencia: string }[]
+  duplicados: number
+  importados: number
+  periodo: string
+}
+
 async function manejarError(r: Response): Promise<never> {
   if (r.status === 401) throw new Error("Sesión vencida: volvé a ingresar")
   if (r.status === 422) throw new Error("Datos inválidos (revisá CUIT, condición IVA o alícuotas)")
@@ -130,4 +141,25 @@ export async function descargarPapelTrabajo(
   })
   if (!r.ok) throw new Error("Error al descargar papel de trabajo")
   return r.blob()
+}
+
+export async function importarConciliacion(
+  clienteId: number,
+  archivo: File,
+  delimitador: string,
+  token: string,
+): Promise<ResultadoConciliacion> {
+  const form = new FormData()
+  form.append("archivo", archivo)
+  form.append("delimitador", delimitador)
+  const r = await fetch(`/clientes/${clienteId}/conciliacion/importar`, {
+    method: "POST",
+    headers: conToken(token),
+    body: form,
+  })
+  if (!r.ok) {
+    const msg = await r.text()
+    throw new Error(msg || "Error al importar")
+  }
+  return r.json()
 }
