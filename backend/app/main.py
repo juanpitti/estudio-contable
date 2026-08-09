@@ -12,6 +12,8 @@ from app.api.conciliacion import router as conciliacion_router
 from app.api.extraccion import router as extraccion_router
 from app.api.facturacion import router as facturacion_router
 from app.api.monotributo import router as monotributo_router
+from app.api.bitacora import router as bitacora_router
+from app.api.monotributo import router as monotributo_router
 
 
 def crear_app() -> FastAPI:
@@ -34,6 +36,8 @@ def crear_app() -> FastAPI:
     app.include_router(conciliacion_router)
     app.include_router(facturacion_router)
     app.include_router(monotributo_router)
+    app.include_router(bitacora_router)
+    return app
     return app
     return app
 
