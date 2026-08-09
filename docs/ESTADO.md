@@ -15,7 +15,7 @@ Plataforma web para estudios contables argentinos, desarrollada por etapas teste
 - **Obsidian:** nota del proyecto en `Obsidian Vault/02-Proyectos/Estudio Contable.md`.
 - **Proceso de trabajo:** skills instaladas en Kimi Work — `writing-plans` → `executing-plans` → `test-driven-development` → `systematic-debugging` → `requesting-code-review` → `verification-before-completion`. Planes en `docs/plans/`.
 
-## Hecho (57 tests backend verdes)
+## Hecho (68 tests backend verdes)
 
 | Módulo | Archivos | Notas |
 |---|---|---|
@@ -23,17 +23,20 @@ Plataforma web para estudios contables argentinos, desarrollada por etapas teste
 | Clientes | `app/cuit.py`, `api/clientes.py` | CUIT módulo 11, 409 duplicado, repo en memoria |
 | ARCA WSAA/wsfe | `app/arca/` | homologación por defecto, transporte inyectable, script portón `scripts/etapa0_arca_check.py` |
 | Extracción Plan 1 | `app/extractor/` | QR AFIP real (confianza 1.0); OCR = **stub** (dice "revisar", no inventa) |
-| IVA | `app/iva/`, `api/comprobantes.py` | Decimal, alícuotas 21/10.5/27, IVA técnico con arrastre, bitácora confirmación |
-| Frontend | `frontend/` | React+TS+Tailwind; login, subir factura (semáforo), Clientes, Liquidación IVA; `npm run dev` levanta backend+frontend (concurrently) |
+| IVA — Calculadora | `app/iva/calculadora.py`, `app/iva/comprobante.py` | Decimal, alícuotas 21/10.5/27, IVA técnico con arrastre |
+| IVA — Alertas | `app/iva/alertas.py` | salto crédito fiscal (warning/critical), IVA técnico acumulado, info saldo favor parcial |
+| IVA — Papeles Excel | `app/iva/papeles.py` | genera .xlsx con hojas Resumen/Ventas/Compras, formato moneda ARS |
+| API Comprobantes | `app/api/comprobantes.py` | POST/GET comprobantes, liquidación con alertas, descarga Excel `/iva/{p}/papel-trabajo` |
+| ARCA Descarga | `app/api/arca.py` | stub listo para wsfe; requiere certificado de homologación del cliente |
+| Frontend | `frontend/` | React+TS+Tailwind; login, subir factura (semáforo), Clientes, Liquidación IVA con alertas visuales + descarga Excel; `npm run dev` levanta ambos servidores |
 | Infra | docker-compose, `.github/workflows/ci.yml` | PostgreSQL cableada pero SIN conectar |
 
 ## Pendiente inmediato (cola priorizada)
 
-1. OCR real: RapidOCR (onnxruntime, pip puro) detrás de `app/extractor/ocr.py` + fallback LLM. Prueba de aceptación v4: 20 facturas, ≥90% campos críticos.
-2. Conectar PostgreSQL (persistencia; hoy cada reinicio limpia todo).
-3. Papeles de trabajo descargables de la liquidación.
-4. Alertas Etapa 2: salto de crédito fiscal, IVA técnico acumulado.
-5. Descarga de comprobantes ARCA → liquidación automática (usa wsfe ya hecho).
+1. **OCR real:** RapidOCR (onnxruntime, pip puro) detrás de `app/extractor/ocr.py` + fallback LLM. Prueba de aceptación v4: 20 facturas, ≥90% campos críticos.
+2. **Conectar PostgreSQL** (persistencia; hoy cada reinicio limpia todo).
+3. **Descarga ARCA end-to-end:** cuando esté disponible certificado de homologación, activar `_wsfe_consultar_comprobantes` en `app/api/arca.py`.
+4. **Etapa 3:** Conciliación y retenciones (motor de match 4 niveles + parsers bancarios).
 
 ## Bloqueos / no verificado
 
@@ -48,3 +51,4 @@ Plataforma web para estudios contables argentinos, desarrollada por etapas teste
 - `kill` de bash no mata procesos Windows: usar `taskkill //PID <pid> //F` (buscar PID con `netstat -ano | grep LISTENING`).
 - No dejar uvicorn viejo corriendo: causa 404/500 fantasma en el proxy de Vite.
 - Commits git: identidad local configurada (Juan / juan@localhost); rama `main`.
+- Cuidado con edits parciales en archivos con imports: pueden duplicarse. Preferir `Write` completo cuando hay riesgo de duplicación.
