@@ -1,14 +1,16 @@
 import { useState } from "react"
 import Clientes from "../components/Clientes"
 import Conciliacion from "../components/Conciliacion"
+import Convenio from "../components/Convenio"
 import Dashboard from "../components/Dashboard"
+import F931 from "../components/F931"
 import Facturacion from "../components/Facturacion"
 import Liquidacion from "../components/Liquidacion"
 import Login from "../components/Login"
 import Monotributo from "../components/Monotributo"
 import SubirFactura from "../components/SubirFactura"
 
-type Solapa = "dashboard" | "subir" | "clientes" | "facturacion" | "monotributo" | "liquidacion" | "conciliacion"
+type Solapa = "dashboard" | "subir" | "clientes" | "facturacion" | "monotributo" | "f931" | "convenio" | "liquidacion" | "conciliacion"
 
 const SOLAPAS: { id: Solapa; etiqueta: string }[] = [
   { id: "dashboard", etiqueta: "Dashboard" },
@@ -16,6 +18,8 @@ const SOLAPAS: { id: Solapa; etiqueta: string }[] = [
   { id: "clientes", etiqueta: "Clientes" },
   { id: "facturacion", etiqueta: "Facturación" },
   { id: "monotributo", etiqueta: "Monotributo" },
+  { id: "f931", etiqueta: "F.931" },
+  { id: "convenio", etiqueta: "Convenio" },
   { id: "liquidacion", etiqueta: "Liquidación IVA" },
   { id: "conciliacion", etiqueta: "Conciliación" },
 ]
@@ -68,6 +72,8 @@ export default function Home() {
         {solapa === "clientes" && <Clientes token={token} />}
         {solapa === "facturacion" && <Facturacion token={token} />}
         {solapa === "monotributo" && <Monotributo token={token} />}
+        {solapa === "f931" && <F931 token={token} />}
+        {solapa === "convenio" && <Convenio token={token} />}
         {solapa === "liquidacion" && <Liquidacion token={token} />}
         {solapa === "conciliacion" && <Conciliacion token={token} />}
       </main>

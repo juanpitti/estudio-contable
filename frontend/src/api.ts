@@ -195,6 +195,39 @@ export async function consultarMonotributo(
   return r.json()
 }
 
+export async function generarF931(
+  clienteId: number,
+  datos: { periodo: string; empleados: { cuit: string; apellido_nombre: string; remuneracion: string; aportes: string; contribuciones: string; situacion_revista: string }[] },
+  token: string,
+): Promise<{ txt: string; nombre_archivo: string }> {
+  const r = await fetch(`/clientes/${clienteId}/f931/generar`, {
+    method: "POST",
+    headers: { ...conToken(token), "Content-Type": "application/json" },
+    body: JSON.stringify(datos),
+  })
+  if (!r.ok) await manejarError(r)
+  return r.json()
+}
+
+export async function generarCM05(
+  clienteId: number,
+  ingresos: Record<string, string>,
+  token: string,
+): Promise<{
+  cuit: string
+  total_ingresos: string
+  atribuciones: Record<string, { ingreso: string; porcentaje: string }>
+  coeficientes: Record<string, string>
+}> {
+  const r = await fetch(`/clientes/${clienteId}/convenio/cm05`, {
+    method: "POST",
+    headers: { ...conToken(token), "Content-Type": "application/json" },
+    body: JSON.stringify({ ingresos }),
+  })
+  if (!r.ok) await manejarError(r)
+  return r.json()
+}
+
 export async function importarConciliacion(
   clienteId: number,
   archivo: File,
