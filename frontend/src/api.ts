@@ -143,6 +143,39 @@ export async function descargarPapelTrabajo(
   return r.blob()
 }
 
+export async function emitirFactura(
+  clienteId: number,
+  datos: {
+    tipo: string
+    punto_venta: number
+    numero: number
+    fecha: string
+    receptor_cuit: string
+    receptor_razon: string
+    receptor_condicion: string
+    neto: string
+    alicuota: string
+    total: string
+  },
+  token: string,
+): Promise<{
+  cae: string
+  vencimiento_cae: string
+  numero: number
+  tipo: string
+  punto_venta: number
+  total: string
+  pdf_base64: string
+}> {
+  const r = await fetch(`/clientes/${clienteId}/facturacion/emitir`, {
+    method: "POST",
+    headers: { ...conToken(token), "Content-Type": "application/json" },
+    body: JSON.stringify(datos),
+  })
+  if (!r.ok) await manejarError(r)
+  return r.json()
+}
+
 export async function importarConciliacion(
   clienteId: number,
   archivo: File,
