@@ -18,7 +18,17 @@ from app.api.f931 import router as f931_router
 from app.api.facturacion import router as facturacion_router
 from app.api.monotributo import router as monotributo_router
 from app.api.monitor import router as monitor_router
-from app.database import init_db
+from app.database import DATABASE_URL, init_db
+
+
+def _run_alembic_migrations() -> None:
+    """Corre migraciones Alembic si estamos en PostgreSQL."""
+    from alembic.config import Config
+    from alembic import command
+
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("sqlalchemy.url", DATABASE_URL)
+    command.upgrade(alembic_cfg, "head")
 
 
 def crear_app() -> FastAPI:
@@ -28,11 +38,14 @@ def crear_app() -> FastAPI:
         description="Backend por etapas testeables — Plan v4",
     )
 
-    # Inicializar tablas de base de datos + seed de usuarios
-    init_db()
+    # Inicializar tablas: Alembic en PostgreSQL, create_all en SQLite (tests/dev)
+    if DATABASE_URL.startswith("postgresql"):
+        _run_alembic_migrations()
+    else:
+        init_db()
+
     from app.seed import seed_usuarios
     seed_usuarios()
-    init_db()
 
     @app.get("/health")
     def health() -> dict:
