@@ -4,64 +4,192 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Primitive — Neutral (cool tint) */
+    --gray-50: 220 20% 97%;
+    --gray-100: 220 15% 94%;
+    --gray-200: 220 12% 90%;
+    --gray-300: 220 10% 82%;
+    --gray-400: 220 9% 70%;
+    --gray-500: 220 8% 58%;
+    --gray-600: 220 7% 46%;
+    --gray-700: 220 6% 36%;
+    --gray-800: 220 5% 26%;
+    --gray-900: 220 4% 18%;
+    --gray-950: 220 3% 12%;
+
+    /* Primitive — Accent (Emerald) */
+    --accent-hue: 155;
+    --accent-50: 155 60% 97%;
+    --accent-100: 155 55% 93%;
+    --accent-200: 155 50% 86%;
+    --accent-300: 155 55% 76%;
+    --accent-400: 155 60% 64%;
+    --accent-500: 155 65% 52%;
+    --accent-600: 155 60% 42%;
+    --accent-700: 155 50% 32%;
+    --accent-800: 155 40% 24%;
+    --accent-900: 155 30% 16%;
+
+    /* Primitive — Semantic */
+    --green-400: 145 55% 65%;
+    --green-600: 145 60% 52%;
+    --amber-400: 40 85% 65%;
+    --amber-600: 40 90% 58%;
+    --red-400: 0 70% 65%;
+    --red-600: 0 70% 48%;
+    --blue-400: 220 70% 65%;
+    --blue-600: 220 70% 52%;
+
+    /* shadcn/ui semantic mappings (light) */
+    --background: var(--gray-50);
+    --foreground: var(--gray-900);
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: var(--gray-900);
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.625rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --popover-foreground: var(--gray-900);
+    --primary: var(--accent-600);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--gray-100);
+    --secondary-foreground: var(--gray-900);
+    --muted: var(--gray-100);
+    --muted-foreground: var(--gray-500);
+    --accent: var(--gray-100);
+    --accent-foreground: var(--gray-900);
+    --destructive: var(--red-600);
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--gray-200);
+    --input: var(--gray-200);
+    --ring: var(--accent-500);
+    --radius: 0.5rem;
+
+    /* Sidebar */
+    --sidebar-background: var(--gray-100);
+    --sidebar-foreground: var(--gray-700);
+    --sidebar-primary: var(--accent-600);
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--gray-200);
+    --sidebar-accent-foreground: var(--gray-900);
+    --sidebar-border: var(--gray-200);
+    --sidebar-ring: var(--accent-500);
+
+    /* Surface stack */
+    --surface-canvas: hsl(var(--gray-50));
+    --surface-raised: hsl(0 0% 100%);
+    --surface-overlay: hsl(0 0% 100%);
+    --surface-sunken: hsl(var(--gray-100));
+    --surface-inverse: hsl(var(--gray-900));
+
+    /* Text */
+    --text-primary: hsl(var(--gray-900));
+    --text-secondary: hsl(var(--gray-500));
+    --text-tertiary: hsl(var(--gray-400));
+    --text-on-accent: #fff;
+    --text-on-inverse: hsl(var(--gray-50));
+    --text-link: hsl(var(--accent-600));
+
+    /* Border */
+    --border-subtle: hsl(220 10% 90%);
+    --border-default: hsl(220 10% 85%);
+    --border-strong: hsl(220 10% 75%);
+    --border-focus: hsl(var(--accent-500));
+
+    /* Status */
+    --success-bg: hsl(145 50% 96%);
+    --success-text: hsl(var(--green-600));
+    --success-border: hsl(var(--green-400));
+    --warning-bg: hsl(40 60% 96%);
+    --warning-text: hsl(var(--amber-600));
+    --warning-border: hsl(var(--amber-400));
+    --error-bg: hsl(0 50% 96%);
+    --error-text: hsl(var(--red-600));
+    --error-border: hsl(var(--red-400));
+    --info-bg: hsl(220 50% 96%);
+    --info-text: hsl(var(--blue-600));
+    --info-border: hsl(var(--blue-400));
+
+    /* Spacing */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+
+    /* Motion */
+    --duration-instant: 80ms;
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Font */
+    --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* shadcn/ui semantic mappings (dark) */
+    --background: 220 15% 8%;
+    --foreground: 220 10% 95%;
+    --card: 220 12% 10%;
+    --card-foreground: 220 10% 95%;
+    --popover: 220 12% 10%;
+    --popover-foreground: 220 10% 95%;
+    --primary: var(--accent-500);
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 10% 14%;
+    --secondary-foreground: 220 10% 95%;
+    --muted: 220 10% 14%;
+    --muted-foreground: 220 8% 55%;
+    --accent: 220 10% 14%;
+    --accent-foreground: 220 10% 95%;
+    --destructive: var(--red-500);
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 10% 16%;
+    --input: 220 10% 16%;
+    --ring: var(--accent-400);
+
+    /* Sidebar dark */
+    --sidebar-background: 220 12% 10%;
+    --sidebar-foreground: 220 8% 65%;
+    --sidebar-primary: var(--accent-500);
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 10% 16%;
+    --sidebar-accent-foreground: 220 10% 95%;
+    --sidebar-border: 220 10% 16%;
+    --sidebar-ring: var(--accent-400);
+
+    /* Surface stack dark */
+    --surface-canvas: hsl(220 15% 8%);
+    --surface-raised: hsl(220 12% 10%);
+    --surface-overlay: hsl(220 12% 14%);
+    --surface-sunken: hsl(220 15% 6%);
+    --surface-inverse: hsl(var(--gray-50));
+
+    /* Text dark */
+    --text-primary: hsl(220 10% 95%);
+    --text-secondary: hsl(220 8% 55%);
+    --text-tertiary: hsl(220 7% 40%);
+    --text-on-inverse: hsl(var(--gray-900));
+    --text-link: hsl(var(--accent-400));
+
+    /* Border dark */
+    --border-subtle: hsl(220 10% 16%);
+    --border-default: hsl(220 10% 18%);
+    --border-strong: hsl(220 10% 25%);
+
+    /* Status dark */
+    --success-bg: hsl(145 30% 12%);
+    --warning-bg: hsl(40 30% 12%);
+    --error-bg: hsl(0 30% 12%);
+    --info-bg: hsl(220 30% 12%);
   }
 }
 
@@ -69,7 +197,22 @@
   * {
     @apply border-border;
   }
+  html {
+    color-scheme: light dark;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+  /* Tabular nums for all monetary/fiscal data */
+  .tabular-data,
+  td[data-type="number"],
+  td[data-type="currency"],
+  td[data-type="cuit"] {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+    text-align: right;
   }
 }

@@ -4,6 +4,10 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -48,6 +52,26 @@ module.exports = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // ui-craft extended tokens
+        surface: {
+          canvas: "var(--surface-canvas)",
+          raised: "var(--surface-raised)",
+          overlay: "var(--surface-overlay)",
+          sunken: "var(--surface-sunken)",
+          inverse: "var(--surface-inverse)",
+        },
+        "text-fg": {
+          primary: "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+          tertiary: "var(--text-tertiary)",
+          link: "var(--text-link)",
+        },
+        status: {
+          success: "var(--success-text)",
+          warning: "var(--warning-text)",
+          error: "var(--error-text)",
+          info: "var(--info-text)",
+        },
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",
@@ -58,6 +82,19 @@ module.exports = {
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+      },
+      transitionDuration: {
+        instant: "var(--duration-instant)",
+        fast: "var(--duration-fast)",
+        normal: "var(--duration-normal)",
+        slow: "var(--duration-slow)",
+      },
+      transitionTimingFunction: {
+        out: "var(--ease-out)",
+        "in-out": "var(--ease-in-out)",
       },
       keyframes: {
         "accordion-down": {
