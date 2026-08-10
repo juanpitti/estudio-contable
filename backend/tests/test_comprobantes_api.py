@@ -1,15 +1,36 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from app.api.clientes import RepoClientes, get_repo
 from app.api.comprobantes import RepoComprobantes, get_repo_comprobantes
+from app.database import Base, get_db
 from app.main import app
 
 
 @pytest.fixture
 def client():
-    repo_cli = RepoClientes()
-    repo_comp = RepoComprobantes()
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    Base.metadata.create_all(bind=engine)
+
+    db = TestingSessionLocal()
+    repo_cli = RepoClientes(db)
+    repo_comp = RepoComprobantes(db)
+
+    def override_get_db():
+        try:
+            yield db
+        finally:
+            pass
+
+    app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_repo] = lambda: repo_cli
     app.dependency_overrides[get_repo_comprobantes] = lambda: repo_comp
     c = TestClient(app)
@@ -23,6 +44,7 @@ def client():
     )
     yield c
     app.dependency_overrides.clear()
+    db.close()
 
 
 VENTA = {
@@ -99,7 +121,6 @@ def test_listar_comprobantes(client):
 
 
 def test_liquidacion_con_alerta_salto_credito(client):
-    # Crear venta pequeña y compra grande
     client.post("/clientes/1/comprobantes", json={
         "tipo": "venta", "fecha": "2026-08-01",
         "lineas": [{"alicuota": "0.21", "neto": "100000", "iva": "21000"}]

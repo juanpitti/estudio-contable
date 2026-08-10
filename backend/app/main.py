@@ -18,6 +18,7 @@ from app.api.f931 import router as f931_router
 from app.api.facturacion import router as facturacion_router
 from app.api.monotributo import router as monotributo_router
 from app.api.monitor import router as monitor_router
+from app.database import init_db
 
 
 def crear_app() -> FastAPI:
@@ -26,6 +27,9 @@ def crear_app() -> FastAPI:
         version="0.1.0",
         description="Backend por etapas testeables — Plan v4",
     )
+
+    # Inicializar tablas de base de datos
+    init_db()
 
     @app.get("/health")
     def health() -> dict:
@@ -52,9 +56,6 @@ def crear_app() -> FastAPI:
         from fastapi.staticfiles import StaticFiles
         app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 
-    return app
-    app.include_router(monitor_router)
-    app.include_router(asistente_router)
     return app
 
 

@@ -1,24 +1,24 @@
 """API de comprobantes IVA + pre-liquidación mensual (Etapa 2).
 
-La ingesta es SIEMPRE por confirmación humana (bitácora Ley 20.488):
-queda registrado quién confirmó y cuándo. La liquidación devuelve el
-desglose por alícuota y los comprobantes incluidos: cada número dice
-de dónde salió (Plan v4 regla 6).
+Repositorio SQLAlchemy inyectable. PostgreSQL en producción, SQLite en tests.
 """
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, field_validator
+from sqlalchemy.orm import Session
 
 from app.api.clientes import RepoClientes, get_repo
 from app.auth import requerir_rol, usuario_actual
+from app.database import get_db
 from app.iva.alertas import analizar_alertas
 from app.iva.calculadora import liquidacion_iva
 from app.iva.comprobante import AlicuotaLinea, ComprobanteIva
 from app.iva.papeles import generar_papel_trabajo
+from app.models_db import DBComprobante, DBLineaAlicuota
 
 router = APIRouter(prefix="/clientes/{cliente_id}", tags=["comprobantes"])
 
@@ -45,48 +45,73 @@ class ComprobanteIn(BaseModel):
 
 
 class RepoComprobantes:
-    def __init__(self) -> None:
-        self._datos: dict[int, ComprobanteIva] = {}
-        self._seq = 0
+    def __init__(self, db: Session) -> None:
+        self._db = db
 
     def crear(self, cliente_id: int, datos: ComprobanteIn, confirmado_por: str) -> ComprobanteIva:
-        from datetime import date
-
-        self._seq += 1
-        comp = ComprobanteIva(
-            id=self._seq,
+        db_comp = DBComprobante(
             cliente_id=cliente_id,
             tipo=datos.tipo,
             fecha=date.fromisoformat(datos.fecha),
-            lineas=[AlicuotaLinea(l.alicuota, l.neto, l.iva) for l in datos.lineas],
             confirmado_por=confirmado_por,
             confirmado_en=datetime.now(timezone.utc),
         )
-        self._datos[comp.id] = comp
-        return comp
+        self._db.add(db_comp)
+        self._db.flush()  # para obtener db_comp.id
+
+        for l in datos.lineas:
+            db_linea = DBLineaAlicuota(
+                comprobante_id=db_comp.id,
+                alicuota=l.alicuota,
+                neto=l.neto,
+                iva=l.iva,
+            )
+            self._db.add(db_linea)
+
+        self._db.commit()
+        self._db.refresh(db_comp)
+        return self._to_domain(db_comp)
 
     def de_cliente(self, cliente_id: int) -> list[ComprobanteIva]:
-        return [c for c in self._datos.values() if c.cliente_id == cliente_id]
+        comps = self._db.query(DBComprobante).filter_by(cliente_id=cliente_id).all()
+        return [self._to_domain(c) for c in comps]
 
     def historial_saldos_favor(self, cliente_id: int, periodos: list[str]) -> list[Decimal]:
-        """Devuelve saldo_a_favor_final por período, en orden cronológico."""
         resultados = []
         for periodo in periodos:
-            comps = [c for c in self.de_cliente(cliente_id) if c.periodo == periodo]
+            comps = self.de_cliente(cliente_id)
+            comps_periodo = [c for c in comps if c.periodo == periodo]
             liq = liquidacion_iva(
-                [c for c in comps if c.tipo == "venta"],
-                [c for c in comps if c.tipo == "compra"],
-                Decimal("0"),  # sin arrastre para el historial puro
+                [c for c in comps_periodo if c.tipo == "venta"],
+                [c for c in comps_periodo if c.tipo == "compra"],
+                Decimal("0"),
             )
             resultados.append(liq.saldo_a_favor_final)
         return resultados
 
+    def _to_domain(self, db_comp: DBComprobante) -> ComprobanteIva:
+        def _norm(d: Decimal) -> Decimal:
+            s = str(d)
+            if "." in s:
+                s = s.rstrip("0").rstrip(".")
+            return Decimal(s) if s else Decimal("0")
 
-_repo = RepoComprobantes()
+        return ComprobanteIva(
+            id=db_comp.id,
+            cliente_id=db_comp.cliente_id,
+            tipo=db_comp.tipo,
+            fecha=db_comp.fecha,
+            lineas=[
+                AlicuotaLinea(_norm(l.alicuota), _norm(l.neto), _norm(l.iva))
+                for l in db_comp.lineas
+            ],
+            confirmado_por=db_comp.confirmado_por,
+            confirmado_en=db_comp.confirmado_en,
+        )
 
 
-def get_repo_comprobantes() -> RepoComprobantes:
-    return _repo
+def get_repo_comprobantes(db: Session = Depends(get_db)) -> RepoComprobantes:
+    return RepoComprobantes(db)
 
 
 def _serializar(comp: ComprobanteIva) -> dict:
@@ -149,7 +174,6 @@ def liquidacion_del_periodo(
         [c for c in comps if c.tipo == "compra"],
         saldo_favor_anterior,
     )
-    # Calcular historial de saldos para alertas
     año, mes = periodo.split("-")
     periodos_previos = []
     for i in range(1, 12):

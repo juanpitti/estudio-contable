@@ -36,6 +36,7 @@ Plataforma web para estudios contables argentinos, desarrollada por etapas teste
 | **Dashboard** | `app/api/dashboard.py` | **Etapa 5**: endpoint `/dashboard` con semáforos, vencimientos, alertas |
 | **F.931** | `app/f931/` | **Etapa 6**: generador TXT F.931 (registros 1/2/3 SICOSS), endpoint `/clientes/{id}/f931/generar` |
 | **Convenio Multilateral** | `app/convenio/` | **Etapa 6**: atribución por jurisdicción (24 provincias + CABA), cálculo de coeficientes CM05, endpoint `/clientes/{id}/convenio/cm05` |
+| **OCR real** | `app/extractor/ocr_rapid.py` | **Etapa 8**: RapidOCR (onnxruntime) + regex para CUIT, fecha, importe, tipo, nro, punto de venta, CAE. Integrado en pipeline de extracción. Tests con imagen generada |
 | **Monitor fiscal** | `app/monitor/` | **Etapa 7**: alertas automáticas por cliente (IVA sin revisar, monotributo cerca del techo), alertas globales (vencimientos), endpoint `/monitor/alertas` |
 | **Asistente IA** | `app/asistente/` | **Etapa 7**: chat sobre datos propios del sistema (clientes, vencimientos, alertas), endpoint `/asistente` |
 | Frontend | `frontend/` | React+TS+Tailwind; **10 tabs**: Dashboard, Subir factura, Clientes, Facturación, Monotributo, **F.931**, **Convenio**, Liquidación IVA, Conciliación, **Asistente**; `npm run dev` levanta ambos servidores |

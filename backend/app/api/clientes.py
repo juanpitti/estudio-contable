@@ -1,13 +1,16 @@
 """API de clientes — cartera mínima del estudio (Etapa 1).
 
-Repositorio en memoria detrás de una interfaz inyectable (Depends):
-PostgreSQL lo reemplaza en la iteración con DB sin tocar los endpoints.
+Repositorio SQLAlchemy inyectable (Depends): PostgreSQL en producción,
+SQLite en tests, sin cambios en los endpoints.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 from app.auth import requerir_rol, usuario_actual
+from app.database import get_db
 from app.models import Cliente, ClienteIn
+from app.models_db import DBCliente
 
 router = APIRouter(prefix="/clientes", tags=["clientes"])
 
@@ -17,30 +20,37 @@ class CuitDuplicado(Exception):
 
 
 class RepoClientes:
-    def __init__(self) -> None:
-        self._datos: dict[int, Cliente] = {}
-        self._seq = 0
+    def __init__(self, db: Session) -> None:
+        self._db = db
 
     def crear(self, datos: ClienteIn) -> Cliente:
-        if any(c.cuit == datos.cuit for c in self._datos.values()):
+        if self._db.query(DBCliente).filter_by(cuit=datos.cuit).first():
             raise CuitDuplicado(datos.cuit)
-        self._seq += 1
-        cliente = Cliente(id=self._seq, **datos.model_dump())
-        self._datos[cliente.id] = cliente
-        return cliente
+        db_cli = DBCliente(
+            cuit=datos.cuit,
+            razon_social=datos.razon_social,
+            condicion_iva=datos.condicion_iva,
+        )
+        self._db.add(db_cli)
+        self._db.commit()
+        self._db.refresh(db_cli)
+        return Cliente(id=db_cli.id, **datos.model_dump())
 
     def listar(self) -> list[Cliente]:
-        return list(self._datos.values())
+        return [
+            Cliente(id=c.id, cuit=c.cuit, razon_social=c.razon_social, condicion_iva=c.condicion_iva)
+            for c in self._db.query(DBCliente).all()
+        ]
 
     def obtener(self, cliente_id: int) -> Cliente | None:
-        return self._datos.get(cliente_id)
+        c = self._db.query(DBCliente).filter_by(id=cliente_id).first()
+        if not c:
+            return None
+        return Cliente(id=c.id, cuit=c.cuit, razon_social=c.razon_social, condicion_iva=c.condicion_iva)
 
 
-_repo = RepoClientes()
-
-
-def get_repo() -> RepoClientes:
-    return _repo
+def get_repo(db: Session = Depends(get_db)) -> RepoClientes:
+    return RepoClientes(db)
 
 
 @router.post("", status_code=201, response_model=Cliente)

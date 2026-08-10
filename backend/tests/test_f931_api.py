@@ -1,13 +1,14 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from app.api.clientes import RepoClientes, get_repo
 from app.main import app
 
 
 @pytest.fixture
-def client():
-    repo = RepoClientes()
+def client(db_session: Session):
+    repo = RepoClientes(db_session)
     app.dependency_overrides[get_repo] = lambda: repo
     c = TestClient(app)
     token = c.post("/auth/login", json={"username": "owner", "password": "owner123"}).json()["access_token"]

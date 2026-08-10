@@ -1,5 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from app.api.clientes import RepoClientes, get_repo
 from app.api.comprobantes import RepoComprobantes, get_repo_comprobantes
@@ -7,9 +8,9 @@ from app.main import app
 
 
 @pytest.fixture
-def client():
-    repo_cli = RepoClientes()
-    repo_comp = RepoComprobantes()
+def client(db_session: Session):
+    repo_cli = RepoClientes(db_session)
+    repo_comp = RepoComprobantes(db_session)
     app.dependency_overrides[get_repo] = lambda: repo_cli
     app.dependency_overrides[get_repo_comprobantes] = lambda: repo_comp
     c = TestClient(app)
@@ -21,7 +22,6 @@ def client():
         "/clientes",
         json={"cuit": "20-27396523-9", "razon_social": "Prueba SA", "condicion_iva": "RI"},
     )
-    # Ingresar una compra
     c.post("/clientes/1/comprobantes", json={
         "tipo": "compra", "fecha": "2026-08-01",
         "lineas": [{"alicuota": "0.21", "neto": "10000", "iva": "2100"}]

@@ -1,5 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from app.api.clientes import RepoClientes, get_repo
 from app.api.comprobantes import RepoComprobantes, get_repo_comprobantes
@@ -7,9 +8,9 @@ from app.main import app
 
 
 @pytest.fixture
-def client():
-    repo_cli = RepoClientes()
-    repo_comp = RepoComprobantes()
+def client(db_session: Session):
+    repo_cli = RepoClientes(db_session)
+    repo_comp = RepoComprobantes(db_session)
     app.dependency_overrides[get_repo] = lambda: repo_cli
     app.dependency_overrides[get_repo_comprobantes] = lambda: repo_comp
     c = TestClient(app)
