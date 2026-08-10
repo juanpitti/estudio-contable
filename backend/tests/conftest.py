@@ -2,14 +2,14 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.database import SessionLocal, init_db, engine
+from app.seed import seed_usuarios
 
 
 @pytest.fixture(autouse=True)
 def limpiar_estado_global():
-    """Limpia tablas de DB entre tests."""
+    """Limpia tablas de DB entre tests (excepto usuarios, que son seed fijo)."""
     from app.bitacora.modelo import _limpiar_revisiones
     _limpiar_revisiones()
-    # Limpiar otras tablas
     from sqlalchemy import text
     with engine.begin() as conn:
         conn.execute(text("DELETE FROM lineas_alicuota"))
@@ -27,6 +27,7 @@ def limpiar_estado_global():
 def db_session() -> Session:
     """Sesión de DB para tests (SQLite en memoria con tablas creadas)."""
     init_db()
+    seed_usuarios()
     db = SessionLocal()
     try:
         yield db

@@ -7,6 +7,7 @@ from sqlalchemy.pool import StaticPool
 from app.api.clientes import RepoClientes, get_repo
 from app.database import Base, get_db
 from app.main import app
+from app.seed import seed_usuarios_en_db
 
 
 @pytest.fixture
@@ -20,6 +21,7 @@ def client():
     Base.metadata.create_all(bind=engine)
 
     db = TestingSessionLocal()
+    seed_usuarios_en_db(db)
     repo = RepoClientes(db)
 
     def override_get_db():

@@ -1,7 +1,6 @@
 """Autenticación JWT con roles (Etapa 1: owner/senior).
 
-Usuarios seed SOLO para desarrollo/staging ficticio. En producción: gestión
-de usuarios por estudio (Plan 10) con DB real.
+Usuarios en DB (PostgreSQL/SQLite). Seed al arrancar para desarrollo.
 """
 
 import hashlib
@@ -13,6 +12,10 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models_db import DBUsuario
 
 _SECRETO = os.environ.get("JWT_SECRET", "dev-secret-cambiar-en-produccion")
 _ALGORITMO = "HS256"
@@ -32,17 +35,10 @@ def verificar_password(password: str, almacenado: str) -> bool:
     return hmac.compare_digest(candidato.hex(), digest)
 
 
-# Usuarios de desarrollo (datos ficticios, Plan v4 regla 2)
-USUARIOS: dict[str, dict] = {
-    "owner": {"password_hash": hash_password("owner123"), "rol": "owner"},
-    "senior": {"password_hash": hash_password("senior123"), "rol": "senior"},
-}
-
-
-def autenticar(username: str, password: str) -> dict | None:
-    usuario = USUARIOS.get(username)
-    if usuario and verificar_password(password, usuario["password_hash"]):
-        return {"sub": username, "rol": usuario["rol"]}
+def autenticar(username: str, password: str, db: Session) -> dict | None:
+    usuario = db.query(DBUsuario).filter_by(username=username).first()
+    if usuario and verificar_password(password, usuario.password_hash):
+        return {"sub": username, "rol": usuario.rol}
     return None
 
 

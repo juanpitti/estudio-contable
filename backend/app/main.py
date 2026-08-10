@@ -28,7 +28,10 @@ def crear_app() -> FastAPI:
         description="Backend por etapas testeables — Plan v4",
     )
 
-    # Inicializar tablas de base de datos
+    # Inicializar tablas de base de datos + seed de usuarios
+    init_db()
+    from app.seed import seed_usuarios
+    seed_usuarios()
     init_db()
 
     @app.get("/health")
